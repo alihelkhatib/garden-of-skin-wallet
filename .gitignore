@@ -13,6 +13,9 @@
 # Pass outputs
 *.pkpass
 
+# Local data
+backend/data/
+
 # OS
 .DS_Store
 Thumbs.db
