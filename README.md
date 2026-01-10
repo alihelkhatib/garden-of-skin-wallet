@@ -25,6 +25,27 @@ Node.js Express + SQLite. Node provides fast JSON handling, easy process executi
    npm start
    ```
 
+## Raspberry Pi 2 Model B v1.1
+Node 18 is recommended for ARMv7.
+
+```bash
+sudo apt-get update
+sudo apt-get install -y build-essential python3 make g++ openssl
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+source ~/.bashrc
+nvm install 18
+nvm use 18
+node -v
+```
+
+Then install and run:
+```bash
+npm install
+npm run init-db
+npm run create-staff -- staff@gardenofskin.com supersecret
+npm start
+```
+
 ## Local endpoints
 - `GET /pass/test` -> signed test pass (`TEST-001`)
 - `POST /passes` -> create a new pass
@@ -32,6 +53,7 @@ Node.js Express + SQLite. Node provides fast JSON handling, easy process executi
 - `POST /auth/login` -> staff login
 - `POST /passes/:serial/add_visit` -> add a visit
 - `POST /passes/:serial/redeem` -> redeem a pass
+- `GET /passes/:serial/transactions` -> recent visit history
 
 ## PassKit endpoints
 - `POST /v1/devices/{deviceLibraryIdentifier}/registrations/{passTypeIdentifier}/{serialNumber}`
@@ -40,7 +62,8 @@ Node.js Express + SQLite. Node provides fast JSON handling, easy process executi
 - `GET /v1/passes/{passTypeIdentifier}/{serialNumber}`
 
 ## Admin UI
-Open `http://localhost:3000/admin/index.html` on a phone. Use the camera to scan the QR code or manually enter a serial.
+- Admin dashboard: `http://localhost:3000/admin/index.html`
+- POS scan view: `http://localhost:3000/admin/pos.html`
 
 ## Required environment variables
 - `PASS_TYPE_ID`
