@@ -1,0 +1,18 @@
+{
+  "name": "garden-of-skin-wallet",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "start": "node backend/src/server.js",
+    "init-db": "node scripts/init-db.js",
+    "create-staff": "node scripts/create-staff.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.5.0",
+    "cookie": "^0.6.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "yazl": "^2.5.1"
+  }
+}
