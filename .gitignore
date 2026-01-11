@@ -1,0 +1,24 @@
+# Environment files
+.env
+.env.*
+
+# Certificates and keys
+*.p12
+*.pem
+*.cer
+*.key
+*.p8
+*.csr
+
+# Pass outputs
+*.pkpass
+
+# Local data
+backend/data/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules
