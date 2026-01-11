@@ -1,6 +1,7 @@
 # Environment files
 .env
 .env.*
+!.env.example
 
 # Certificates and keys
 *.p12
@@ -24,3 +25,4 @@ Thumbs.db
 
 # Node
 node_modules
+

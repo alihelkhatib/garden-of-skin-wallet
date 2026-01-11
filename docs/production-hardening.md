@@ -7,16 +7,16 @@ Example `/etc/nginx/sites-available/garden-of-skin-wallet`:
 ```
 server {
   listen 80;
-  server_name wallet.gardenofskin.com;
+  server_name gardenofskinmedspa.com;
   return 301 https://$host$request_uri;
 }
 
 server {
   listen 443 ssl http2;
-  server_name wallet.gardenofskin.com;
+  server_name gardenofskinmedspa.com;
 
-  ssl_certificate /etc/letsencrypt/live/wallet.gardenofskin.com/fullchain.pem;
-  ssl_certificate_key /etc/letsencrypt/live/wallet.gardenofskin.com/privkey.pem;
+  ssl_certificate /etc/letsencrypt/live/gardenofskinmedspa.com/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/gardenofskinmedspa.com/privkey.pem;
 
   add_header Strict-Transport-Security "max-age=31536000" always;
 
@@ -78,3 +78,4 @@ Example cron:
 ## APNs
 - Use `APNS_HOST=api.push.apple.com` for production.
 - Use sandbox host only during development.
+
