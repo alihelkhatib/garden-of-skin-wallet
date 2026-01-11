@@ -3,6 +3,8 @@ const express = require("express");
 const dotenv = require("dotenv");
 const cookie = require("cookie");
 const path = require("path");
+const fs = require("fs");
+const rateLimit = require("express-rate-limit");
 const { getConfig } = require("./config");
 const { getDb } = require("./db");
 const { nowIso, randomToken } = require("./utils");
@@ -14,6 +16,35 @@ dotenv.config();
 const app = express();
 const config = getConfig();
 const db = getDb();
+
+function ensureDir(dirPath) {
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
+}
+
+ensureDir(config.logDir);
+
+const accessLogPath = path.join(config.logDir, "access.log");
+const errorLogPath = path.join(config.logDir, "error.log");
+
+function logLine(filePath, line) {
+  fs.appendFile(filePath, `${line}\n`, (err) => {
+    if (err) {
+      console.error("Log write failed", err.message);
+    }
+  });
+}
+
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on("finish", () => {
+    const durationMs = Date.now() - start;
+    const line = `${new Date().toISOString()} ${req.method} ${req.originalUrl} ${res.statusCode} ${durationMs}ms ${req.ip}`;
+    logLine(accessLogPath, line);
+  });
+  next();
+});
 
 if (config.enforceHttps) {
   app.set("trust proxy", 1);
@@ -28,6 +59,18 @@ if (config.enforceHttps) {
 
 app.use(express.json({ limit: "1mb" }));
 app.use("/admin", express.static(path.join(__dirname, "..", "..", "admin-ui")));
+
+const limiter = rateLimit({
+  windowMs: config.rateLimitWindowMs,
+  max: config.rateLimitMax,
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+app.use("/auth", limiter);
+app.use("/passes", limiter);
+app.use("/v1", limiter);
+app.use("/pass", limiter);
 
 function assertSigningConfig() {
   if (!config.passTypeId || !config.teamId) {
@@ -104,6 +147,12 @@ function recordAudit(action, details) {
     .run(action, details, nowIso());
 }
 
+function recordTransaction(passId, staffUserId, type, delta) {
+  db.prepare(
+    "INSERT INTO transactions (pass_id, staff_user_id, type, delta, created_at) VALUES (?, ?, ?, ?, ?)"
+  ).run(passId, staffUserId, type, delta, nowIso());
+}
+
 function fetchPassBySerial(serialNumber) {
   return db
     .prepare("SELECT * FROM passes WHERE serial_number = ?")
@@ -121,10 +170,18 @@ async function triggerPassUpdate(passId) {
     try {
       await sendPassUpdate(row.push_token, config);
     } catch (err) {
-      console.error("APNs push failed", err.message);
+      logLine(errorLogPath, `${new Date().toISOString()} APNs push failed ${err.message}`);
     }
   }
 }
+
+app.get("/health", (req, res) => {
+  return res.json({
+    ok: true,
+    uptime: Math.round(process.uptime()),
+    timestamp: new Date().toISOString()
+  });
+});
 
 app.get("/pass/test", async (req, res) => {
   try {
@@ -140,10 +197,11 @@ app.get("/pass/test", async (req, res) => {
     res.sendFile(outputPath, (err) => {
       cleanup();
       if (err) {
-        console.error(err);
+        logLine(errorLogPath, `${new Date().toISOString()} pass.test ${err.message}`);
       }
     });
   } catch (err) {
+    logLine(errorLogPath, `${new Date().toISOString()} pass.test ${err.message}`);
     res.status(500).json({ error: err.message });
   }
 });
@@ -164,6 +222,7 @@ app.post("/passes", (req, res) => {
     } catch (err) {
       serialNumber = generateSerial();
       if (attempt === 4) {
+        logLine(errorLogPath, `${new Date().toISOString()} pass.create ${err.message}`);
         return res.status(500).json({ error: "Unable to generate serial" });
       }
     }
@@ -199,10 +258,11 @@ app.get("/passes/:serial/pkpass", async (req, res) => {
     res.sendFile(outputPath, (err) => {
       cleanup();
       if (err) {
-        console.error(err);
+        logLine(errorLogPath, `${new Date().toISOString()} pass.download ${err.message}`);
       }
     });
   } catch (err) {
+    logLine(errorLogPath, `${new Date().toISOString()} pass.download ${err.message}`);
     return res.status(500).json({ error: err.message });
   }
 });
@@ -230,7 +290,7 @@ app.post("/auth/login", (req, res) => {
     cookie.serialize("session_token", sessionToken, {
       httpOnly: true,
       sameSite: "lax",
-      secure: true,
+      secure: config.enforceHttps,
       path: "/",
       maxAge: 60 * 60 * 8
     })
@@ -249,7 +309,7 @@ app.post("/auth/logout", (req, res) => {
     cookie.serialize("session_token", "", {
       httpOnly: true,
       sameSite: "lax",
-      secure: true,
+      secure: config.enforceHttps,
       path: "/",
       maxAge: 0
     })
@@ -272,6 +332,23 @@ app.get("/passes/:serial", requireStaff, (req, res) => {
   });
 });
 
+app.get("/passes/:serial/transactions", requireStaff, (req, res) => {
+  const pass = db
+    .prepare("SELECT id FROM passes WHERE serial_number = ?")
+    .get(req.params.serial);
+  if (!pass) {
+    return res.status(404).json({ error: "Pass not found" });
+  }
+
+  const rows = db
+    .prepare(
+      "SELECT type, delta, created_at FROM transactions WHERE pass_id = ? ORDER BY created_at DESC LIMIT 20"
+    )
+    .all(pass.id);
+
+  return res.json({ transactions: rows });
+});
+
 app.post("/passes/:serial/add_visit", requireStaff, async (req, res) => {
   const pass = db
     .prepare("SELECT id, visits FROM passes WHERE serial_number = ?")
@@ -284,6 +361,7 @@ app.post("/passes/:serial/add_visit", requireStaff, async (req, res) => {
   db.prepare("UPDATE passes SET visits = ?, updated_at = ? WHERE id = ?")
     .run(updatedVisits, nowIso(), pass.id);
 
+  recordTransaction(pass.id, req.staffUserId, "visit", 1);
   recordAudit("visit_added", `serial=${req.params.serial}, visits=${updatedVisits}`);
   await triggerPassUpdate(pass.id);
 
@@ -301,6 +379,7 @@ app.post("/passes/:serial/redeem", requireStaff, async (req, res) => {
   db.prepare("UPDATE passes SET status = ?, updated_at = ? WHERE id = ?")
     .run("redeemed", nowIso(), pass.id);
 
+  recordTransaction(pass.id, req.staffUserId, "redeem", 0);
   recordAudit("pass_redeemed", `serial=${req.params.serial}`);
   await triggerPassUpdate(pass.id);
 
@@ -457,10 +536,11 @@ app.get("/v1/passes/:passTypeIdentifier/:serialNumber", async (req, res) => {
     res.sendFile(outputPath, (err) => {
       cleanup();
       if (err) {
-        console.error(err);
+        logLine(errorLogPath, `${new Date().toISOString()} pass.fetch ${err.message}`);
       }
     });
   } catch (err) {
+    logLine(errorLogPath, `${new Date().toISOString()} pass.fetch ${err.message}`);
     return res.status(500).send("Pass generation failed");
   }
 });

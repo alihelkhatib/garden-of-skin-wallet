@@ -47,6 +47,7 @@ npm start
 ```
 
 ## Local endpoints
+- `GET /health` -> health check
 - `GET /pass/test` -> signed test pass (`TEST-001`)
 - `POST /passes` -> create a new pass
 - `GET /passes/:serial/pkpass` -> download pass by serial
@@ -79,8 +80,16 @@ npm start
 - `APNS_PRIVATE_KEY_PATH`
 - `APNS_HOST`
 - `ENFORCE_HTTPS`
+- `RATE_LIMIT_WINDOW_MS`
+- `RATE_LIMIT_MAX`
+- `LOG_DIR`
+- `BACKUP_DIR`
 
 See `docs/signing-restoration.md` for certificate restoration steps.
 
-## TODOs (Phase 5)
-1. Production hardening: HTTPS proxy, backups, logging, rate limiting.
+## Production hardening
+See `docs/production-hardening.md` for reverse proxy setup, backups, logging, and health checks.
+
+## TODOs
+- Monitoring and alerting.
+\n## Operations\nSee docs/operational-runbook.md for deployment and runbook guidance.\n

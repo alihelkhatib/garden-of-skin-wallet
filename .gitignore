@@ -15,6 +15,8 @@
 
 # Local data
 backend/data/
+logs/
+backups/
 
 # OS
 .DS_Store

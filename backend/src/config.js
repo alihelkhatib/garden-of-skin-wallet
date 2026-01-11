@@ -21,7 +21,15 @@ function getConfig() {
     apnsKeyId: process.env.APNS_KEY_ID || "",
     apnsTeamId: process.env.APNS_TEAM_ID || "",
     apnsPrivateKeyPath: process.env.APNS_PRIVATE_KEY_PATH || "",
-    apnsHost: process.env.APNS_HOST || ""
+    apnsHost: process.env.APNS_HOST || "",
+    rateLimitWindowMs: Number(process.env.RATE_LIMIT_WINDOW_MS || 60000),
+    rateLimitMax: Number(process.env.RATE_LIMIT_MAX || 120),
+    logDir:
+      process.env.LOG_DIR ||
+      path.join(__dirname, "..", "..", "logs"),
+    backupDir:
+      process.env.BACKUP_DIR ||
+      path.join(__dirname, "..", "..", "backups")
   };
 }
 

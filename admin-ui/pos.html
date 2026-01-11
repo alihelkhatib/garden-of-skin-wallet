@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Garden of Skin Loyalty Admin</title>
+  <title>Garden of Skin POS</title>
   <link rel="stylesheet" href="/admin/styles.css" />
 </head>
 <body>
@@ -20,7 +20,7 @@
     </header>
 
     <section id="loginView" class="panel">
-      <h2>Staff Login</h2>
+      <h2>POS Login</h2>
       <form id="loginForm">
         <label>
           Email
@@ -52,8 +52,8 @@
       <button id="lookupManual" class="ghost">Lookup</button>
     </section>
 
-    <section id="passView" class="panel hidden">
-      <h2>Pass Details</h2>
+    <section id="actionView" class="panel hidden">
+      <h2>Quick Actions</h2>
       <div class="pass-card">
         <div>
           <div class="label">Serial</div>
@@ -67,20 +67,14 @@
           <div class="label">Status</div>
           <div id="statusValue" class="value"></div>
         </div>
-        <div>
-          <div class="label">Updated</div>
-          <div id="updatedValue" class="value"></div>
-        </div>
       </div>
       <div class="row">
         <button id="addVisit">Add Visit</button>
         <button id="redeem" class="danger">Redeem</button>
       </div>
-      <h3 class="section-title">Recent Activity</h3>
-      <div id="activityList" class="activity-list"></div>
-      <button id="backToScan" class="ghost">Back to Scan</button>
+      <button id="backToScan" class="ghost">Scan Another</button>
     </section>
   </main>
-  <script src="/admin/app.js"></script>
+  <script src="/admin/pos.js"></script>
 </body>
 </html>
