@@ -104,6 +104,12 @@ function recordAudit(action, details) {
     .run(action, details, nowIso());
 }
 
+function recordTransaction(passId, staffUserId, type, delta) {
+  db.prepare(
+    "INSERT INTO transactions (pass_id, staff_user_id, type, delta, created_at) VALUES (?, ?, ?, ?, ?)"
+  ).run(passId, staffUserId, type, delta, nowIso());
+}
+
 function fetchPassBySerial(serialNumber) {
   return db
     .prepare("SELECT * FROM passes WHERE serial_number = ?")
@@ -272,6 +278,23 @@ app.get("/passes/:serial", requireStaff, (req, res) => {
   });
 });
 
+app.get("/passes/:serial/transactions", requireStaff, (req, res) => {
+  const pass = db
+    .prepare("SELECT id FROM passes WHERE serial_number = ?")
+    .get(req.params.serial);
+  if (!pass) {
+    return res.status(404).json({ error: "Pass not found" });
+  }
+
+  const rows = db
+    .prepare(
+      "SELECT type, delta, created_at FROM transactions WHERE pass_id = ? ORDER BY created_at DESC LIMIT 20"
+    )
+    .all(pass.id);
+
+  return res.json({ transactions: rows });
+});
+
 app.post("/passes/:serial/add_visit", requireStaff, async (req, res) => {
   const pass = db
     .prepare("SELECT id, visits FROM passes WHERE serial_number = ?")
@@ -284,6 +307,7 @@ app.post("/passes/:serial/add_visit", requireStaff, async (req, res) => {
   db.prepare("UPDATE passes SET visits = ?, updated_at = ? WHERE id = ?")
     .run(updatedVisits, nowIso(), pass.id);
 
+  recordTransaction(pass.id, req.staffUserId, "visit", 1);
   recordAudit("visit_added", `serial=${req.params.serial}, visits=${updatedVisits}`);
   await triggerPassUpdate(pass.id);
 
@@ -301,6 +325,7 @@ app.post("/passes/:serial/redeem", requireStaff, async (req, res) => {
   db.prepare("UPDATE passes SET status = ?, updated_at = ? WHERE id = ?")
     .run("redeemed", nowIso(), pass.id);
 
+  recordTransaction(pass.id, req.staffUserId, "redeem", 0);
   recordAudit("pass_redeemed", `serial=${req.params.serial}`);
   await triggerPassUpdate(pass.id);
 

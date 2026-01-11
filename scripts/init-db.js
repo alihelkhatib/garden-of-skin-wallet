@@ -59,6 +59,17 @@ db.exec(`
     FOREIGN KEY(pass_id) REFERENCES passes(id)
   );
 
+  CREATE TABLE IF NOT EXISTS transactions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    pass_id INTEGER NOT NULL,
+    staff_user_id INTEGER NOT NULL,
+    type TEXT NOT NULL,
+    delta INTEGER NOT NULL,
+    created_at TEXT NOT NULL,
+    FOREIGN KEY(pass_id) REFERENCES passes(id),
+    FOREIGN KEY(staff_user_id) REFERENCES staff_users(id)
+  );
+
   CREATE TABLE IF NOT EXISTS audit_log (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     action TEXT NOT NULL,

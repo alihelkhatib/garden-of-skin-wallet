@@ -1,6 +1,6 @@
 const loginView = document.getElementById("loginView");
 const scanView = document.getElementById("scanView");
-const passView = document.getElementById("passView");
+const actionView = document.getElementById("actionView");
 const loginForm = document.getElementById("loginForm");
 const loginError = document.getElementById("loginError");
 const logoutButton = document.getElementById("logout");
@@ -12,19 +12,17 @@ const video = document.getElementById("video");
 const addVisit = document.getElementById("addVisit");
 const redeem = document.getElementById("redeem");
 const backToScan = document.getElementById("backToScan");
-const activityList = document.getElementById("activityList");
 
 const serialValue = document.getElementById("serialValue");
 const visitsValue = document.getElementById("visitsValue");
 const statusValue = document.getElementById("statusValue");
-const updatedValue = document.getElementById("updatedValue");
 
 let currentSerial = null;
 let mediaStream = null;
 let scanInterval = null;
 
 function show(view) {
-  [loginView, scanView, passView].forEach((panel) => panel.classList.add("hidden"));
+  [loginView, scanView, actionView].forEach((panel) => panel.classList.add("hidden"));
   view.classList.remove("hidden");
 }
 
@@ -61,28 +59,6 @@ logoutButton.addEventListener("click", async () => {
   show(loginView);
 });
 
-function renderActivity(transactions) {
-  if (!activityList) return;
-  activityList.innerHTML = "";
-
-  if (!transactions.length) {
-    activityList.textContent = "No recent activity.";
-    return;
-  }
-
-  transactions.forEach((item) => {
-    const row = document.createElement("div");
-    row.className = "activity-item";
-    const left = document.createElement("div");
-    left.textContent = `${item.type} (${item.delta})`;
-    const right = document.createElement("span");
-    right.textContent = new Date(item.created_at).toLocaleString();
-    row.appendChild(left);
-    row.appendChild(right);
-    activityList.appendChild(row);
-  });
-}
-
 async function lookupPass(serial) {
   const response = await fetch(`/passes/${encodeURIComponent(serial)}`);
   if (!response.ok) {
@@ -95,15 +71,7 @@ async function lookupPass(serial) {
   serialValue.textContent = data.serialNumber;
   visitsValue.textContent = data.visits;
   statusValue.textContent = data.status;
-  updatedValue.textContent = new Date(data.updatedAt).toLocaleString();
-
-  const activityResponse = await fetch(`/passes/${encodeURIComponent(serial)}/transactions`);
-  if (activityResponse.ok) {
-    const activity = await activityResponse.json();
-    renderActivity(activity.transactions || []);
-  }
-
-  show(passView);
+  show(actionView);
 }
 
 lookupManual.addEventListener("click", () => {

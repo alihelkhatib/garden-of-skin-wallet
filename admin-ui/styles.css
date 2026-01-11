@@ -19,6 +19,13 @@ body {
   color: var(--text);
 }
 
+a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+  margin-right: 12px;
+}
+
 .app {
   max-width: 640px;
   margin: 0 auto;
@@ -36,6 +43,10 @@ body {
   margin: 0;
   font-size: 24px;
   letter-spacing: 0.5px;
+}
+
+.nav-links {
+  margin-top: 6px;
 }
 
 .panel {
@@ -147,4 +158,30 @@ button.danger {
   font-size: 16px;
   font-weight: 600;
   margin-top: 4px;
+}
+
+.section-title {
+  margin-top: 20px;
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.activity-list {
+  margin-top: 8px;
+  border-top: 1px solid #efe6e2;
+}
+
+.activity-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #efe6e2;
+  font-size: 14px;
+}
+
+.activity-item span {
+  color: var(--muted);
 }
