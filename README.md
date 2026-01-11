@@ -20,10 +20,7 @@ Node.js Express + SQLite. Node provides fast JSON handling, easy process executi
    ```bash
    npm run create-staff -- staff@gardenofskin.com supersecret
    ```
-6. Start the server:
-   ```bash
-   npm start
-   ```
+6. Start the server:\n   ```bash\n   npm start\n   ```\n\nOr use the helper scripts:\n- Windows PowerShell: `scripts/start.ps1`\n- Linux/macOS: `scripts/start.sh`
 
 ## Raspberry Pi 2 Model B v1.1
 Node 18 is recommended for ARMv7.
@@ -93,4 +90,5 @@ See `docs/production-hardening.md` for reverse proxy setup, backups, logging, an
 ## TODOs
 - Monitoring and alerting.
 \n## Operations\nSee docs/operational-runbook.md for deployment and runbook guidance.\n
+
 
