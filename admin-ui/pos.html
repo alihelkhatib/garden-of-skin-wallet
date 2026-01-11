@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Garden of Skin POS</title>
+  <link rel="stylesheet" href="/admin/styles.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="app-header">
+      <div>
+        <h1>Garden of Skin</h1>
+        <nav class="nav-links">
+          <a href="/admin/index.html">Admin</a>
+          <a href="/admin/pos.html">POS</a>
+        </nav>
+      </div>
+      <button id="logout" class="ghost hidden">Log out</button>
+    </header>
+
+    <section id="loginView" class="panel">
+      <h2>POS Login</h2>
+      <form id="loginForm">
+        <label>
+          Email
+          <input type="email" name="email" required />
+        </label>
+        <label>
+          Password
+          <input type="password" name="password" required />
+        </label>
+        <button type="submit">Sign in</button>
+      </form>
+      <p id="loginError" class="error"></p>
+    </section>
+
+    <section id="scanView" class="panel hidden">
+      <h2>Scan Pass</h2>
+      <div class="scanner">
+        <video id="video" playsinline></video>
+        <div class="scanner-overlay">Align QR inside the frame</div>
+      </div>
+      <div class="row">
+        <button id="startScan">Start Scan</button>
+        <button id="stopScan" class="ghost">Stop</button>
+      </div>
+      <label class="manual">
+        Manual entry
+        <input type="text" id="manualSerial" placeholder="Serial number" />
+      </label>
+      <button id="lookupManual" class="ghost">Lookup</button>
+    </section>
+
+    <section id="actionView" class="panel hidden">
+      <h2>Quick Actions</h2>
+      <div class="pass-card">
+        <div>
+          <div class="label">Serial</div>
+          <div id="serialValue" class="value"></div>
+        </div>
+        <div>
+          <div class="label">Visits</div>
+          <div id="visitsValue" class="value"></div>
+        </div>
+        <div>
+          <div class="label">Status</div>
+          <div id="statusValue" class="value"></div>
+        </div>
+      </div>
+      <div class="row">
+        <button id="addVisit">Add Visit</button>
+        <button id="redeem" class="danger">Redeem</button>
+      </div>
+      <button id="backToScan" class="ghost">Scan Another</button>
+    </section>
+  </main>
+  <script src="/admin/pos.js"></script>
+</body>
+</html>
