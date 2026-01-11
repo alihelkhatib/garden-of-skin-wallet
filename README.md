@@ -92,3 +92,4 @@ See `docs/production-hardening.md` for reverse proxy setup, backups, logging, an
 \n## Operations\nSee docs/operational-runbook.md for deployment and runbook guidance.\n
 
 
+\n## NFC tags\nSee docs/nfc-setup.md for NFC tag setup and recommended URLs.\n
